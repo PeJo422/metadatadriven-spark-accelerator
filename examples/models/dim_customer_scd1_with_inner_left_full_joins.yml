@@ -1,0 +1,66 @@
+name: dim_customer_enriched
+source: bronze.customer
+target: silver.dim_customer_enriched
+
+scd_type: 1
+
+business_key:
+  columns:
+    - CompanyId
+    - CustomerNumber
+
+row_hash_columns:
+  - FirstName
+  - LastName
+  - Email
+  - RegionName
+  - SegmentName
+  - CountryName
+
+row_filters:
+  - column: IsDeleted
+    operator: is_null
+  - column: IsActive
+    operator: equals
+    value: true
+
+joins:
+  - table: bronze.region
+    type: inner
+    alias: r
+    on:
+      - left_alias: s
+        left_column: RegionId
+        right_column: RegionId
+  - table: bronze.segment
+    type: left
+    alias: sg
+    on:
+      - left_alias: s
+        left_column: SegmentId
+        right_column: SegmentId
+  - table: bronze.country
+    type: full
+    alias: c
+    on:
+      - left_alias: r
+        left_column: CountryId
+        right_column: CountryId
+
+columns:
+  - name: CompanyId
+    type: int
+  - name: CustomerNumber
+    type: string
+  - name: FirstName
+    type: string
+  - name: LastName
+    type: string
+  - name: Email
+    type: string
+  - name: RegionName
+    type: string
+  - name: SegmentName
+    type: string
+  - name: CountryName
+    type: string
