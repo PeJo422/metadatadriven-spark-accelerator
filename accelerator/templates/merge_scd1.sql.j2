@@ -1,0 +1,24 @@
+MERGE INTO {{ target.table }} t
+USING (
+{{ select_sql | indent(2, true) }}
+) s
+ON
+{%- for pk in primary_key.columns %}
+  t.{{ pk }} = s.{{ pk }}{% if not loop.last %} AND{% endif %}
+{%- endfor %}
+WHEN MATCHED THEN
+  UPDATE SET
+  {%- for col in update_columns %}
+    t.{{ col }} = s.{{ col }}{% if not loop.last %},{% endif %}
+  {%- endfor %}
+WHEN NOT MATCHED THEN
+  INSERT (
+  {%- for col in insert_columns %}
+    {{ col }}{% if not loop.last %}, {% endif %}
+  {%- endfor %}
+  )
+  VALUES (
+  {%- for col in insert_columns %}
+    s.{{ col }}{% if not loop.last %}, {% endif %}
+  {%- endfor %}
+  );
