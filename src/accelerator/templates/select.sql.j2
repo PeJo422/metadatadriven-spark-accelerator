@@ -1,0 +1,24 @@
+WITH source_filtered AS (
+    SELECT *
+    FROM {{ source }} {{ source_alias }}
+    {% if filter_sql %}
+    WHERE {{ filter_sql }}
+    {% endif %}
+),
+source_joined AS (
+    SELECT {{ source_alias }}.*
+    FROM source_filtered {{ source_alias }}
+    {% if join_sql %}
+    {{ join_sql }}
+    {% endif %}
+),
+source_prepared AS (
+    SELECT
+        {{ business_hash_expr }} AS business_hash,
+        {{ row_hash_expr }} AS row_hash,
+        {% for col in select_columns %}
+        {{ col }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    FROM source_joined {{ source_alias }}
+)
+SELECT * FROM source_prepared

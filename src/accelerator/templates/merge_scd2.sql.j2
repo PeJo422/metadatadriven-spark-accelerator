@@ -1,0 +1,22 @@
+MERGE INTO {{ target }} {{ target_alias }}
+USING source_prepared {{ source_alias }}
+ON {{ target_alias }}.business_hash = {{ source_alias }}.business_hash
+   AND {{ target_alias }}.is_current = true
+WHEN MATCHED AND {{ target_alias }}.row_hash <> {{ source_alias }}.row_hash THEN
+  UPDATE SET
+    {{ target_alias }}.valid_to = current_timestamp(),
+    {{ target_alias }}.is_current = false
+WHEN NOT MATCHED THEN
+  INSERT *;
+
+INSERT INTO {{ target }}
+SELECT
+  sp.*,
+  current_timestamp() AS valid_from,
+  cast(null as timestamp) AS valid_to,
+  true AS is_current
+FROM source_prepared sp
+JOIN {{ target }} t
+  ON t.business_hash = sp.business_hash
+WHERE t.is_current = false
+  AND t.row_hash <> sp.row_hash
