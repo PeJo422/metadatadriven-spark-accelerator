@@ -1,0 +1,52 @@
+name: dim_filter_operator_coverage
+source: orders
+target: dim_filter_operator_coverage
+
+scd_type: 1
+
+business_key:
+  columns:
+    - CompanyId
+    - OrderNumber
+
+row_filters:
+  - column: DeletedAt
+    operator: is_null
+  - column: ProcessedAt
+    operator: is_not_null
+  - column: Status
+    operator: equals
+    value: Completed
+  - column: Region
+    operator: not_equals
+    value: Test
+  - column: Amount
+    operator: less_than
+    value: 10000
+  - column: Priority
+    operator: greater_than
+    value: 0
+  - column: CreatedDateKey
+    operator: less_or_equal
+    value: 20241231
+  - column: UpdatedDateKey
+    operator: greater_or_equal
+    value: 20240101
+
+columns:
+  - name: CompanyId
+    type: int
+  - name: OrderNumber
+    type: string
+  - name: Status
+    type: string
+  - name: Region
+    type: string
+  - name: Amount
+    type: decimal(18,2)
+  - name: Priority
+    type: int
+  - name: CreatedDate
+    type: date
+  - name: UpdatedDate
+    type: date

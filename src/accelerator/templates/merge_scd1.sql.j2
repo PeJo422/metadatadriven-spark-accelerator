@@ -1,0 +1,7 @@
+MERGE INTO {{ target }} {{ target_alias }}
+USING source_prepared {{ source_alias }}
+ON {{ target_alias }}.business_hash = {{ source_alias }}.business_hash
+WHEN MATCHED AND {{ target_alias }}.row_hash <> {{ source_alias }}.row_hash THEN
+  UPDATE SET *
+WHEN NOT MATCHED THEN
+  INSERT *
