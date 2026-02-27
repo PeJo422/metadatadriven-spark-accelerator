@@ -1,0 +1,22 @@
+name: dim_customer
+source: customer
+target: dim_customer
+
+scd_type: 1
+
+business_key:
+  columns:
+    - CompanyId
+    - CustomerNumber
+
+columns:
+  - name: CompanyId
+    type: int
+  - name: CustomerNumber
+    type: string
+  - name: FirstName
+    type: string
+  - name: LastName
+    type: string
+  - name: Email
+    type: string
