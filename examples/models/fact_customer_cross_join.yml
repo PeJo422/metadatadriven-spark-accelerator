@@ -1,0 +1,28 @@
+name: fact_customer_snapshot
+source: bronze.customer
+target: silver.fact_customer_snapshot
+
+scd_type: 1
+
+business_key:
+  columns:
+    - CompanyId
+    - CustomerNumber
+
+row_hash_columns:
+  - CompanyId
+  - CustomerNumber
+  - SnapshotDate
+
+joins:
+  - table: bronze.snapshot_calendar
+    type: cross
+    alias: cal
+
+columns:
+  - name: CompanyId
+    type: int
+  - name: CustomerNumber
+    type: string
+  - name: SnapshotDate
+    type: date
