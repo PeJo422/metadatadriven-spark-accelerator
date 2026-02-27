@@ -136,3 +136,20 @@ Finns i `examples/models/`:
 5. `operator_coverage.yml`
    - Samtliga filteroperatorer (`is_null`, `is_not_null`, `equals`, `not_equals`, `less_than`, `greater_than`, `less_or_equal`, `greater_or_equal`).
 
+
+## Minimal YAML → SQL compiler (v1.0)
+
+A standalone deterministic compiler is available under `accelerator/`:
+
+- `accelerator/generator/validate.py` validates YAML with JSON Schema.
+- `accelerator/generator/render.py` compiles YAML to SQL with Jinja2 templates.
+- SQL output is written to `accelerator/output/{model.name}.sql`.
+
+Run:
+
+```bash
+python accelerator/generator/render.py accelerator/models/dimensions/dim_customer_enriched.yml
+```
+
+The compiler only performs YAML -> SQL compilation.
+It does not execute SQL and contains no runtime orchestration.

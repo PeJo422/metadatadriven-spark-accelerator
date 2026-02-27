@@ -1,0 +1,42 @@
+{% from 'hash_macro.sql.j2' import row_hash_expression %}
+{% from 'incremental_macro.sql.j2' import incremental_condition %}
+{% macro sql_literal(value) -%}
+{%- if value is boolean -%}
+{{ 'true' if value else 'false' }}
+{%- elif value is number -%}
+{{ value }}
+{%- elif value is none -%}
+null
+{%- else -%}
+'{{ value }}'
+{%- endif -%}
+{%- endmacro %}
+SELECT
+{% for col in columns %}
+  {{ source.alias }}.{{ col.name }},{% if col.type in ['date', 'datetime'] %}
+  cast(date_format({{ source.alias }}.{{ col.name }}, 'yyyyMMdd') as int) AS {{ col.name }}Key,{% endif %}
+{% endfor %}
+{% if row_hash_columns %}
+  {{ row_hash_expression(row_hash_columns | map('string') | list) }} AS row_hash,
+{% endif %}
+  current_timestamp() AS _compiled_at
+FROM {{ source.table }} {{ source.alias }}
+{% for join in joins %}
+{{ join.type | upper }} JOIN {{ join.table }} {{ join.alias }} ON
+  {%- for cond in join.on %}
+  {{ cond.left_alias }}.{{ cond.left_column }} = {{ join.alias }}.{{ cond.right_column }}{% if not loop.last %} AND{% endif %}
+  {%- endfor %}
+{% endfor %}
+WHERE 1 = 1
+{% for filter in row_filters %}
+  AND {% if filter.operator == 'is_null' %}
+      {{ source.alias }}.{{ filter.column }} IS NULL
+      {% elif filter.operator == 'equals' %}
+      {{ source.alias }}.{{ filter.column }} = {{ sql_literal(filter.value) }}
+      {% elif filter.operator == 'not_equals' %}
+      {{ source.alias }}.{{ filter.column }} <> {{ sql_literal(filter.value) }}
+      {% endif %}
+{% endfor %}
+{% if incremental.enabled %}
+  AND {{ incremental_condition(incremental, target.table) }}
+{% endif %}

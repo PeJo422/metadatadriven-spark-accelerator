@@ -1,0 +1,52 @@
+name: dim_customer_enriched
+
+source:
+  table: customer
+  alias: s
+
+target:
+  table: dim_customer_enriched
+
+scd_type: 1
+
+primary_key:
+  columns:
+    - dataareaid
+    - recid
+
+business_key:
+  columns:
+    - CompanyId
+    - CustomerNumber
+
+incremental:
+  enabled: true
+  column: ModifiedDate
+  type: datetime
+
+row_hash_columns:
+  - FirstName
+  - LastName
+  - Email
+
+row_filters:
+  - column: IsDeleted
+    operator: is_null
+  - column: IsActive
+    operator: equals
+    value: true
+
+joins:
+  - table: region
+    alias: r
+    type: inner
+    on:
+      - left_alias: s
+        left_column: RegionId
+        right_column: RegionId
+
+columns:
+  - name: CompanyId
+    type: int
+  - name: BirthDate
+    type: date

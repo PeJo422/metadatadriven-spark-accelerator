@@ -1,0 +1,13 @@
+{% macro incremental_condition(incremental, target_table) -%}
+{%- if incremental.type in ["int", "bigint"] -%}
+{{ incremental.column }} > (
+  SELECT coalesce(max({{ incremental.column }}), 0)
+  FROM {{ target_table }}
+)
+{%- elif incremental.type in ["date", "datetime"] -%}
+{{ incremental.column }} > (
+  SELECT coalesce(max({{ incremental.column }}), '1900-01-01')
+  FROM {{ target_table }}
+)
+{%- endif -%}
+{%- endmacro %}
