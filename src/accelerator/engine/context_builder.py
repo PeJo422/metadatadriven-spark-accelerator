@@ -6,7 +6,7 @@ from accelerator.engine.join_builder import build_join_sql
 from accelerator.metadata.schema_models import ModelSpec
 
 
-def build_context(spec: ModelSpec) -> dict:
+def build_context(spec: ModelSpec, *, source_table: str, target_table: str) -> dict:
     select_exprs: list[str] = []
     hash_source_exprs: dict[str, str] = {}
 
@@ -30,8 +30,8 @@ def build_context(spec: ModelSpec) -> dict:
 
     return {
         "model_name": spec.name,
-        "source": spec.source,
-        "target": spec.target,
+        "source": source_table,
+        "target": target_table,
         "source_alias": SOURCE_ALIAS,
         "target_alias": TARGET_ALIAS,
         "select_columns": select_exprs,

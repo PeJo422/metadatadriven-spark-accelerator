@@ -1,6 +1,6 @@
 name: fact_customer_snapshot
-source: bronze.customer
-target: silver.fact_customer_snapshot
+source: customer
+target: fact_customer_snapshot
 
 scd_type: 1
 
@@ -15,7 +15,7 @@ row_hash_columns:
   - SnapshotDate
 
 joins:
-  - table: bronze.snapshot_calendar
+  - table: snapshot_calendar
     type: cross
     alias: cal
 

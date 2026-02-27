@@ -1,6 +1,6 @@
 name: dim_filter_operator_coverage
-source: bronze.orders
-target: silver.dim_filter_operator_coverage
+source: orders
+target: dim_filter_operator_coverage
 
 scd_type: 1
 

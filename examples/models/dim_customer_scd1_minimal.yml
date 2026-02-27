@@ -1,6 +1,6 @@
 name: dim_customer
-source: bronze.customer
-target: silver.dim_customer
+source: customer
+target: dim_customer
 
 scd_type: 1
 

@@ -1,6 +1,6 @@
 name: dim_customer_history
-source: bronze.customer
-target: silver.dim_customer_history
+source: customer
+target: dim_customer_history
 
 scd_type: 2
 
@@ -21,7 +21,7 @@ row_filters:
     operator: is_null
 
 joins:
-  - table: bronze.region
+  - table: region
     type: left
     on:
       - left_alias: s

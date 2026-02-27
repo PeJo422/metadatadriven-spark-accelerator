@@ -1,3 +1,5 @@
+import re
+
 from accelerator.config.enums import FilterOperator, JoinType, SCDType
 from accelerator.metadata.schema_models import ModelSpec
 
@@ -9,6 +11,18 @@ class ValidationError(ValueError):
 _REQUIRED_KEYS = {"name", "source", "target", "scd_type", "business_key", "columns"}
 _OPTIONAL_KEYS = {"row_hash_columns", "row_filters", "joins"}
 _FORBIDDEN_KEYS = {"sql", "where", "hash", "date_format"}
+_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _validate_logical_table_name(name: str, field_name: str) -> None:
+    if "." in name:
+        raise ValidationError(
+            f"{field_name} must be a logical table name only (no schema/lakehouse), got '{name}'"
+        )
+    if not _IDENTIFIER_PATTERN.match(name):
+        raise ValidationError(
+            f"{field_name} must match pattern {_IDENTIFIER_PATTERN.pattern}, got '{name}'"
+        )
 
 
 def validate_raw_payload(payload: dict) -> None:
@@ -26,6 +40,9 @@ def validate_raw_payload(payload: dict) -> None:
 
 
 def validate_model_spec(spec: ModelSpec) -> None:
+    _validate_logical_table_name(spec.source, "source")
+    _validate_logical_table_name(spec.target, "target")
+
     if spec.scd_type not in {SCDType.ONE.value, SCDType.TWO.value}:
         raise ValidationError("scd_type must be '1' or '2'")
 
@@ -49,6 +66,7 @@ def validate_model_spec(spec: ModelSpec) -> None:
     valid_join_types = {item.value for item in JoinType}
     aliases = ["s"]
     for index, join in enumerate(spec.joins, start=1):
+        _validate_logical_table_name(join.table, f"joins[{index}].table")
         if join.type.lower() not in valid_join_types:
             raise ValidationError(f"Unsupported join type '{join.type}'")
 

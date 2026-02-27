@@ -1,6 +1,6 @@
 name: dim_customer_enriched
-source: bronze.customer
-target: silver.dim_customer_enriched
+source: customer
+target: dim_customer_enriched
 
 scd_type: 1
 
@@ -25,21 +25,21 @@ row_filters:
     value: true
 
 joins:
-  - table: bronze.region
+  - table: region
     type: inner
     alias: r
     on:
       - left_alias: s
         left_column: RegionId
         right_column: RegionId
-  - table: bronze.segment
+  - table: segment
     type: left
     alias: sg
     on:
       - left_alias: s
         left_column: SegmentId
         right_column: SegmentId
-  - table: bronze.country
+  - table: country
     type: full
     alias: c
     on:
